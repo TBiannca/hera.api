@@ -1,0 +1,6 @@
+services:
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: 'hera_db'
+      MYSQL_ROOT_PASSWORD: 'root'
