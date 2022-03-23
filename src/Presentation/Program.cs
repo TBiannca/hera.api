@@ -9,14 +9,10 @@ builder.Services.AddDbContext<Context>(options => options.UseMySql(connectionStr
 
 var app = builder.Build();
 
-app.MapGet("/", () =>
-{
-    using var serviceScope = ((IApplicationBuilder) app).ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
-    var context = serviceScope.ServiceProvider.GetRequiredService<Context>();
-    context.Database.EnsureCreated();
-    context.Database.Migrate();
+using var serviceScope = ((IApplicationBuilder) app).ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
+var context = serviceScope.ServiceProvider.GetRequiredService<Context>();
+context.Database.Migrate();
 
-    return "Hello World!";
-});
+app.MapGet("/", () => "Hello World!");
 
 app.Run();
