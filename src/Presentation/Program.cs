@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetSection("ConnectionString").Value;
-builder.Services.AddDbContext<Context>(options => options.UseMySQL(connectionString));
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 27));
+builder.Services.AddDbContext<Context>(options => options.UseMySql(connectionString, serverVersion));
 
 var app = builder.Build();
 
