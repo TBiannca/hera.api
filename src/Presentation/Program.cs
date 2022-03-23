@@ -14,6 +14,7 @@ app.MapGet("/", () =>
     using var serviceScope = ((IApplicationBuilder) app).ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
     var context = serviceScope.ServiceProvider.GetRequiredService<Context>();
     context.Database.EnsureCreated();
+    context.Database.Migrate();
 
     return "Hello World!";
 });
