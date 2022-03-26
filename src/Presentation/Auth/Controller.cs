@@ -14,10 +14,10 @@ public class Controller : Microsoft.AspNetCore.Mvc.Controller
     }
     [Route("register")]
     [HttpPost]
-    public async Task<IActionResult> Register()
+    public async Task<IActionResult> Register([FromBody]Credentials credentials)
     {
-        IdentityUser user = new IdentityUser(){ UserName = "admin" };
-        var result = await _userManager.CreateAsync(user, "Admin123!");
+        IdentityUser user = new IdentityUser(){ UserName = credentials.UserName };
+        var result = await _userManager.CreateAsync(user, credentials.Password);
         var statusCode = result.Succeeded ? 200 : 400;
 
         return StatusCode(statusCode, result);
