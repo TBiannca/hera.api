@@ -36,16 +36,16 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapControllers();
 
 using var serviceScope = ((IApplicationBuilder) app).ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
 var context = serviceScope.ServiceProvider.GetRequiredService<Context>();
 context.Database.Migrate();
-
-app.MapGet("/", () => "Hello World!").RequireAuthorization();
 
 app.Run();
