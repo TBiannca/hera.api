@@ -17,7 +17,9 @@ public class Controller : Microsoft.AspNetCore.Mvc.Controller
     public async Task<IActionResult> Register()
     {
         IdentityUser user = new IdentityUser(){ UserName = "admin" };
-        await _userManager.CreateAsync(user, "Admin123!");
-        return Ok();
+        var result = await _userManager.CreateAsync(user, "Admin123!");
+        var statusCode = result.Succeeded ? 200 : 400;
+
+        return StatusCode(statusCode, result);
     }
 }
