@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -44,10 +45,12 @@ public class Controller : Microsoft.AspNetCore.Mvc.Controller
             };
 
             var token = GetToken(authClaims);
-
+            var refreshToken = GenerateRefreshToken();
+            
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
+                refreshToken = refreshToken,
                 expiration = token.ValidTo
             });
         }
@@ -68,5 +71,13 @@ public class Controller : Microsoft.AspNetCore.Mvc.Controller
         );
 
         return token;
+    }
+    
+    private static string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using var rngRandomNumberGenerator = RandomNumberGenerator.Create();
+        rngRandomNumberGenerator.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }
