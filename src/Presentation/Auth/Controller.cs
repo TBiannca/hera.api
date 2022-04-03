@@ -49,9 +49,8 @@ public class Controller : Microsoft.AspNetCore.Mvc.Controller
             
             return Ok(new
             {
-                token = new JwtSecurityTokenHandler().WriteToken(token),
-                refreshToken = refreshToken,
-                expiration = token.ValidTo
+                accessToken = new JwtSecurityTokenHandler().WriteToken(token),
+                refreshToken = refreshToken
             });
         }
         return Unauthorized();
