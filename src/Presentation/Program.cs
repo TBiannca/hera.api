@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,8 +39,20 @@ builder.Services
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Policy",  policyBuilder =>
+    {
+        policyBuilder.WithOrigins("http://localhost:3000")
+            .WithMethods("*")
+            .WithHeaders(HeaderNames.ContentType);
+    });
+});
+
 var app = builder.Build();
 
+app.UseRouting();
+app.UseCors("Policy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
