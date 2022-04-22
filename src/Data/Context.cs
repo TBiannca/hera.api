@@ -1,8 +1,9 @@
+using Domain.Auth.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data;
-public class Context : IdentityDbContext
+public class Context : IdentityDbContext<MApplicationUser>
 {
     public DbSet<EPerson> Persons { get; set; }
     

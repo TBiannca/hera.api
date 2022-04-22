@@ -1,10 +1,13 @@
 using System.Text;
 using Data;
+using Domain;
+using Domain.Auth.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Presentation.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,8 +15,11 @@ var connectionString = builder.Configuration.GetSection("ConnectionString").Valu
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 27));
 builder.Services.AddDbContext<Context>(options => options.UseMySql(connectionString, serverVersion));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<Context>();
+builder.Services.AddIdentity<MApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<Context>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddTransient<ITokenService, TokenService>();
 
 builder.Services
     .AddAuthentication(options =>

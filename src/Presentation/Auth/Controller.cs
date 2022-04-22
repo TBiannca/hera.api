@@ -1,28 +1,32 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
+using Data;
+using Domain;
+using Domain.Auth.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Presentation.Auth;
 
 [Route("auth")]
 public class Controller : Microsoft.AspNetCore.Mvc.Controller
 {
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<MApplicationUser> _userManager;
+    private readonly Context _context;
+    private readonly ITokenService _tokenService;
 
-    public Controller(UserManager<IdentityUser> userManager)
+    public Controller(UserManager<MApplicationUser> userManager, Context context, ITokenService tokenService)
     {
         _userManager = userManager;
+        _context = context;
+        _tokenService = tokenService;
     }
     
     [Route("register")]
     [HttpPost]
     public async Task<IActionResult> Register([FromBody]Credentials credentials)
     {
-        IdentityUser user = new IdentityUser(){ UserName = credentials.UserName };
+        MApplicationUser user = new(){ UserName = credentials.UserName };
         var result = await _userManager.CreateAsync(user, credentials.Password);
         var statusCode = result.Succeeded ? 200 : 400;
 
@@ -44,39 +48,66 @@ public class Controller : Microsoft.AspNetCore.Mvc.Controller
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            var token = GetToken(authClaims);
-            var refreshToken = GenerateRefreshToken();
+            var token =  _tokenService.GenerateAccessToken(authClaims);
+            var refreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = DateTime.Now.AddMinutes(1);
+            await _userManager.UpdateAsync(user);
             
             return Ok(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(token),
-                refreshToken = refreshToken
+                refreshToken = refreshToken,
+                expiration = token.ValidTo
             });
         }
         return Unauthorized();
     }
     
-    private JwtSecurityToken GetToken(List<Claim> authClaims)
+    [Route("refresh")]
+    [HttpPost]
+    public async Task<IActionResult> RefreshToken([FromBody] MAuthTokens tokens)
     {
-        var bytes = Encoding.UTF8.GetBytes("this is my custom Secret key for authentication");
-        var authSigningKey = new SymmetricSecurityKey(bytes);
+        if (tokens is null)
+        {
+            return BadRequest("Invalid client request");
+        }
 
-        var token = new JwtSecurityToken(
-            issuer: "https://localhost:7216/",
-            audience: "https://localhost:7216/",
-            expires: DateTime.Now.AddHours(3),
-            claims: authClaims,
-            signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-        );
+        string? accessToken = tokens.AccessToken;
+        string? refreshToken = tokens.RefreshToken;
 
-        return token;
-    }
-    
-    private static string GenerateRefreshToken()
-    {
-        var randomNumber = new byte[64];
-        using var rngRandomNumberGenerator = RandomNumberGenerator.Create();
-        rngRandomNumberGenerator.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
+        var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken);
+        if (principal == null)
+        {
+            return BadRequest("Invalid access token or refresh token");
+        }
+
+        #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+        #pragma warning disable CS8602 // Dereference of a possibly null reference.
+        
+        string username = principal.Identity.Name;
+        
+        #pragma warning restore CS8602 // Dereference of a possibly null reference.
+        #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+
+        var user = await _userManager.FindByNameAsync(username);
+
+        if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
+        {
+            return BadRequest("Invalid access token or refresh token");
+        }
+
+        var newAccessToken = _tokenService.GenerateAccessToken(principal.Claims.ToList());
+        var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        await _userManager.UpdateAsync(user);
+
+        return new ObjectResult(new
+        {
+            accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+            refreshToken = newRefreshToken
+        });
     }
 }
