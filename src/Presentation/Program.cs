@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Presentation.Auth;
+using Presentation.GraphQL.Base;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +45,7 @@ builder.Services
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
+builder.Services.AddMvc().AddNewtonsoftJson();
 
 builder.Services.AddCors(options =>
 {
@@ -55,12 +57,16 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddScoped<Schema>();
+builder.Services.AddScoped<Presentation.Person.Creating.IResolver, Presentation.Person.Creating.Resolver>();
+builder.Services.AddScoped<Presentation.Person.Fetching.IResolver, Presentation.Person.Fetching.Resolver>();
+
 var app = builder.Build();
 
 app.UseRouting();
+app.UseAuthorization();
 app.UseCors("Policy");
 app.UseAuthentication();
-app.UseAuthorization();
 app.MapControllers();
 
 using var serviceScope = ((IApplicationBuilder) app).ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
