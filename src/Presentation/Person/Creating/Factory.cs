@@ -6,11 +6,11 @@ using Presentation.Person.Types;
 
 namespace Presentation.Person.Creating;
 
-public class Factory
+public static class Factory
 {
     public static FieldType Make(IServiceProvider provider)
     {
-        return new()
+        return new FieldType()
         {
             Name = "createPerson",
             Description = "Creates a person.",
@@ -29,5 +29,6 @@ public class Factory
         typeof(NonNullGraphType<ListGraphType<NonNullGraphType<TCreatePerson>>>))
     {
         Name = "input",
+        Description = "The person to be created."
     });
 }

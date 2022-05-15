@@ -16,19 +16,24 @@ namespace Presentation.GraphQL
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Dto query)
         {
-            var result = await Execute(query).ConfigureAwait(false);
-            return HandleResult(result);
+            var result = await new DocumentExecuter().ExecuteAsync(config =>
+            {
+                config.Schema = _schema;
+                config.Query = query.Query; 
+                config.Inputs = query.Variables.ToInputs();
+            });
+            
+            return await ToActionResult(result).ConfigureAwait(false);
         }
-
-        private async Task<ExecutionResult> Execute(Dto query) => await new DocumentExecuter().ExecuteAsync(configure =>
+        
+        private async Task<IActionResult> ToActionResult(ExecutionResult result)
         {
-            configure.Schema = _schema;
-            configure.Query = query.Query;
-            configure.Variables = query.Variables.ToInputs();
-        }).ConfigureAwait(false);
+            if (result.Errors?.Count > 0)
+            {
+                return BadRequest();
+            }
 
-        private IActionResult HandleResult(ExecutionResult result) => result.Errors != null
-            ? BadRequest(new { ValidationErrors = result.Errors.Select(error => error.ToString()) })
-            : Ok(new { result.Data });
+            return Ok(await new DocumentWriter().WriteToStringAsync(result).ConfigureAwait(false));
+        }
     }
 }

@@ -2,6 +2,8 @@ using System.Text;
 using Data;
 using Domain;
 using Domain.Auth.Models;
+using Domain.Person.Creating.Commands;
+using Domain.Person.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +46,7 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson(x => x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 builder.Services.AddMvc().AddNewtonsoftJson();
 
 builder.Services.AddCors(options =>
@@ -60,6 +62,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<Schema>();
 builder.Services.AddScoped<Presentation.Person.Creating.IResolver, Presentation.Person.Creating.Resolver>();
 builder.Services.AddScoped<Presentation.Person.Fetching.IResolver, Presentation.Person.Fetching.Resolver>();
+builder.Services.AddScoped<ICreatePerson, CreatePerson>();
+builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 
 var app = builder.Build();
 
