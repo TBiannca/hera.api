@@ -1,12 +1,17 @@
+using Data;
 using Domain.Person.Models;
-using GraphQL;
+using Domain.Person.Repositories;
 
 namespace Presentation.Person.Fetching;
 
 public class Resolver : IResolver
 {
-    public IEnumerable<MPerson> Execute(IResolveFieldContext<object> input)
+    private readonly IPersonRepository _person;
+
+    public Resolver(IPersonRepository person) => _person = person;
+
+        public IEnumerable<MPerson> Execute()
     {
-        throw new NotImplementedException();
+        return _person.GetAll();
     }
 }

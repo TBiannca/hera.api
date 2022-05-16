@@ -16,6 +16,10 @@ public class PersonRepository : IPersonRepository
         .Select(MakeModel)
         .ToList();
 
+    public IEnumerable<MPerson> GetAll() => _context.Persons
+        .Select(MakeModel)
+        .ToList();
+
     private EPerson InsertPerson(EPerson entity)
     {
         _context.Add(entity);

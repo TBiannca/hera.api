@@ -5,7 +5,7 @@ using Presentation.Person.Types;
 
 namespace Presentation.Person.Fetching;
 
-public class Factory
+public static class Factory
 {
     public static FieldType Make(IServiceProvider provider)
     {
@@ -13,13 +13,13 @@ public class Factory
         {
             Name = "persons",
             Description = "Fetch all the existing persons.",
-            Type = typeof(TPerson),
+            Type = typeof(NonNullGraphType<ListGraphType<NonNullGraphType<TPerson>>>),
             Resolver = new FuncFieldResolver<TPerson, object>(MakeResolver(provider)),
         };
     }
 
     private static Func<IResolveFieldContext<object>, object> MakeResolver(IServiceProvider provider)
     {
-        return input => provider.GetService<IResolver>().Execute(input);
+        return _ => provider.GetService<IResolver>().Execute();
     }
 }
