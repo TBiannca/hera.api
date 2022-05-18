@@ -62,6 +62,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<Schema>();
 builder.Services.AddScoped<Presentation.Person.Creating.IResolver, Presentation.Person.Creating.Resolver>();
 builder.Services.AddScoped<Presentation.Person.Fetching.IResolver, Presentation.Person.Fetching.Resolver>();
+builder.Services.AddScoped<Presentation.Person.Deleting.IResolver, Presentation.Person.Deleting.Resolver>();
 builder.Services.AddScoped<ICreatePerson, CreatePerson>();
 builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 

@@ -16,6 +16,12 @@ public class PersonRepository : IPersonRepository
         .Select(MakeModel)
         .ToList();
 
+    public MPerson Delete(int input) => _context.Persons
+        .Where(person => person.Id == input).ToList()
+        .Select(DeletePerson)
+        .Select(MakeModel)
+        .First();
+
     public IEnumerable<MPerson> GetAll() => _context.Persons
         .Select(MakeModel)
         .ToList();
@@ -26,6 +32,14 @@ public class PersonRepository : IPersonRepository
         _context.SaveChanges();
         return entity;
     }
+    
+    private EPerson DeletePerson(EPerson entity)
+    {
+        _context.Remove(entity);
+        _context.SaveChanges();
+        return entity;
+    }
+    
     private static EPerson MakeEntity(MCreatePerson model) => new EPerson
     {
         Name = model.Name,

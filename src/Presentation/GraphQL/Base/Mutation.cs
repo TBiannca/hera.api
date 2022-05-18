@@ -1,5 +1,4 @@
 using global::GraphQL.Types;
-using Presentation.Person.Creating;
 
 namespace Presentation.GraphQL.Base;
 
@@ -10,6 +9,7 @@ public sealed class Mutation : ObjectGraphType
         Name = "mutation";
         Description = "All the mutations that can be done.";
 
-        AddField(Factory.Make(provider));
+        AddField(Person.Creating.Factory.Make(provider));
+        AddField(Person.Deleting.Factory.Make(provider));
     }
 }
