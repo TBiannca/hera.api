@@ -49,6 +49,7 @@ public class PersonRepository : IPersonRepository
 
     private static MPerson MakeModel(EPerson entity) => new MPerson
     {
+        Id = entity.Id,
         Name = entity.Name,
         Role = entity.Role,
         Descriptors = entity.Descriptors,
