@@ -4,16 +4,11 @@ using Domain;
 using Domain.Auth.Models;
 using Domain.Person.Creating.Commands;
 using Domain.Person.Repositories;
-using GraphQL.Server.Authorization.AspNetCore;
-using GraphQL.Validation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using Presentation.Auth;
-using Presentation.GraphQL;
 using Presentation.GraphQL.Base;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,8 +22,6 @@ builder.Services.AddIdentity<MApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddTransient<ITokenService, TokenService>();
-//builder.Services.AddTransient<IValidationRule, AuthValidationRule>();
-
 
 builder.Services.AddAuthorization();
 builder.Services
@@ -36,12 +29,9 @@ builder.Services
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        //options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
-        //options.SaveToken = true;
-        //options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuer = true,
