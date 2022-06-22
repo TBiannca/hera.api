@@ -9,6 +9,7 @@
     <ItemGroup>
       <PackageReference Include="GraphQL" Version="4.5.0" />
       <PackageReference Include="GraphQL.NewtonsoftJson" Version="4.5.0" />
+      <PackageReference Include="GraphQL.Server.Authorization.AspNetCore" Version="4.4.1" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.3" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.3" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />

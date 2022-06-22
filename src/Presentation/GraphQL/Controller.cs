@@ -1,19 +1,21 @@
+using Microsoft.AspNetCore.Authorization;
+using global::GraphQL;
+using global::GraphQL.NewtonsoftJson;
+using Microsoft.AspNetCore.Mvc;
+using Presentation.GraphQL.Base;
+
 namespace Presentation.GraphQL
 {
-    using System.Threading.Tasks;
-    using global::GraphQL;
-    using global::GraphQL.NewtonsoftJson;
-    using Microsoft.AspNetCore.Mvc;
-    using Presentation.GraphQL.Base;
-
     [Route("graphql")]
     public class Controller : Microsoft.AspNetCore.Mvc.Controller
     {
         private readonly Schema _schema;
+        public Controller(Schema schema)
+        {
+            _schema = schema;
+        }
 
-        public Controller(Schema schema) => _schema = schema;
-
-        [HttpPost]
+        [HttpPost, Authorize]
         public async Task<IActionResult> Post([FromBody] Dto query)
         {
             var result = await new DocumentExecuter().ExecuteAsync(config =>
