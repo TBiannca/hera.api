@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Presentation.Auth;
 using Presentation.GraphQL.Base;
 
@@ -51,8 +52,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Policy",  policyBuilder =>
     {
         policyBuilder.WithOrigins("http://localhost:3000")
-            .WithMethods("*")
-            .WithHeaders("*");
+            .AllowAnyHeader()
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -66,10 +69,9 @@ builder.Services.AddScoped<IPersonRepository, PersonRepository>();
 var app = builder.Build();
 
 app.UseRouting();
-app.UseHttpsRedirection();
 app.UseAuthentication();
-app.UseAuthorization();
 app.UseCors("Policy");
+app.UseAuthorization();
 app.MapControllers();
 
 using var serviceScope = ((IApplicationBuilder) app).ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope();
